@@ -157,6 +157,11 @@ enum Phase {
   MG = 0, EG = 1, PHASE_NB = 2
 };
 
+enum SearchStage {
+  MAIN_THREAD_SEARCH = 0,
+  SEARCH = 1
+};
+
 enum ScaleFactor {
   SCALE_FACTOR_DRAW    = 0,
   SCALE_FACTOR_ONEPAWN = 48,

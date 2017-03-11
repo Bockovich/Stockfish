@@ -236,10 +236,6 @@ void MainThread::search() {
   Color us = rootPos.side_to_move();
   Time.init(Limits, us, rootPos.game_ply());
 
-  int contempt = Options["Contempt"] * PawnValueEg / 100; // From centipawns
-  DrawValue[ us] = VALUE_DRAW - Value(contempt);
-  DrawValue[~us] = VALUE_DRAW + Value(contempt);
-
   if (rootMoves.empty())
   {
       rootMoves.push_back(RootMove(MOVE_NONE));
@@ -331,6 +327,8 @@ void Thread::search() {
   bestValue = delta = alpha = -VALUE_INFINITE;
   beta = VALUE_INFINITE;
   completedDepth = DEPTH_ZERO;
+  Color us = rootPos.side_to_move();
+  int contempt = Options["Contempt"] * PawnValueEg / 100; // From centipawns
 
   if (mainThread)
   {
@@ -356,6 +354,9 @@ void Thread::search() {
          && !Signals.stop
          && (!Limits.depth || Threads.main()->rootDepth / ONE_PLY <= Limits.depth))
   {
+      DrawValue[ us] = VALUE_DRAW - Value(contempt + std::round(Threads.main()->dynamicContempt));
+      DrawValue[~us] = VALUE_DRAW + Value(contempt + std::round(Threads.main()->dynamicContempt));
+
       // Distribute search depths across the threads
       if (idx)
       {
@@ -366,7 +367,7 @@ void Thread::search() {
 
       // Age out PV variability metric
       if (mainThread)
-          mainThread->bestMoveChanges *= 0.505, mainThread->failedLow = false;
+          mainThread->update(MAIN_THREAD_SEARCH), mainThread->failedLow = false;
 
       // Save the last iteration's scores before first PV line is searched and
       // all the move scores except the (new) PV are set to -VALUE_INFINITE.
@@ -1056,7 +1057,7 @@ moves_loop: // When in check search starts from here
               // iteration. This information is used for time management: When
               // the best move changes frequently, we allocate some more time.
               if (moveCount > 1 && thisThread == Threads.main())
-                  ++static_cast<MainThread*>(thisThread)->bestMoveChanges;
+                  static_cast<MainThread*>(thisThread)->update(SEARCH);
           }
           else
               // All other moves but the PV are set to the lowest value: this is

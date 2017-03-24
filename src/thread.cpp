@@ -120,7 +120,7 @@ void MainThread::update(SearchStage s){
       ++bestMoveChanges;
     else if (s == MAIN_THREAD_SEARCH)
         bestMoveChanges *= 0.505;
-  dynamicContempt = bestMoveChanges < 0.267? 46 * (0.267 - bestMoveChanges): 0;
+  dynamicContempt = bestMoveChanges < 0.267 && bestMoveChanges > 0.06? 46 * (0.267 - bestMoveChanges): 0;
 }
 
 

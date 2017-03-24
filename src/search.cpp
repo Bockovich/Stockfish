@@ -354,8 +354,9 @@ void Thread::search() {
          && !Signals.stop
          && (!Limits.depth || Threads.main()->rootDepth / ONE_PLY <= Limits.depth))
   {
-      DrawValue[ us] = VALUE_DRAW - Value(contempt + std::round(Threads.main()->dynamicContempt));
-      DrawValue[~us] = VALUE_DRAW + Value(contempt + std::round(Threads.main()->dynamicContempt));
+      int dynamicContempt = std::round(Threads.main()->dynamicContempt);
+      DrawValue[ us] = VALUE_DRAW - Value(contempt + dynamicContempt);
+      DrawValue[~us] = VALUE_DRAW + Value(contempt + dynamicContempt);
 
       // Distribute search depths across the threads
       if (idx)
